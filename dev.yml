@@ -1,0 +1,35 @@
+version: '3.4'
+
+services:
+  kha-protocol:
+    image: python:3.8-slim-buster
+    container_name: kha-protocol
+    environment:
+      PYTHONPATH: '${PYTHONPATH}:./network'
+    build:
+      context: .
+    volumes:
+      - ./:/app
+    working_dir: /app
+    command: >
+      sh -c "apt-get update &&
+             apt-get install -y build-essential curl &&
+             curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash &&
+             sh /root/.bashrc &&
+             pip install -r requirements.txt &&
+             python -m network.services"
+
+  kichi-network:
+    image: node:14-alpine
+    container_name: kichi-network
+    volumes:
+      - ./:/app
+    working_dir: /app
+    command: >
+      sh -c "npx hardhat node"
+    ports:
+      - 9545:8545
+
+  # ethnode:
+  #   image: ghcr.io/vrde/ethnode:latest
+  #   container_name: kichi-ethnode
